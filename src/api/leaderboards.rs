@@ -6,7 +6,7 @@ pub mod leaderboards {
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
     use steamworks::{
-        Leaderboard, LeaderboardDataRequest, LeaderboardDisplayType,
+        Leaderboard, LeaderboardDisplayType,
         LeaderboardEntry as SteamLeaderboardEntry, LeaderboardSortMethod,
         UploadScoreMethod as SteamUploadScoreMethod,
     };
@@ -209,21 +209,22 @@ pub mod leaderboards {
         };
 
         if let Some(leaderboard) = leaderboard {
-            let request_type = match data_request {
-                DataRequest::Global => LeaderboardDataRequest::Global,
-                DataRequest::GlobalAroundUser => LeaderboardDataRequest::GlobalAroundUser,
-                DataRequest::Friends => LeaderboardDataRequest::Friends,
-            };
-
             let (tx, rx) = oneshot::channel();
             let mut tx = Some(tx);
 
+            // Convert DataRequest to LeaderboardDataRequest
+            let steam_data_request = match data_request {
+                DataRequest::Global => steamworks::LeaderboardDataRequest::Global,
+                DataRequest::GlobalAroundUser => steamworks::LeaderboardDataRequest::GlobalAroundUser,
+                DataRequest::Friends => steamworks::LeaderboardDataRequest::Friends,
+            };
+
             client.user_stats().download_leaderboard_entries(
                 &leaderboard,
-                request_type,
+                steam_data_request,
                 range_start as usize,
                 range_end as usize,
-                0, // max_detail_data_size - 0 means no details
+                100, // max_entries - reasonable default
                 move |result| {
                     if let Some(sender) = tx.take() {
                         let _ = sender.send(result);
@@ -232,7 +233,10 @@ pub mod leaderboards {
             );
 
             match rx.await {
-                Ok(Ok(entries)) => entries.into_iter().map(LeaderboardEntry::from).collect(),
+                Ok(Ok(entries)) => {
+                    // Convert SteamLeaderboardEntry to LeaderboardEntry
+                    entries.into_iter().map(|entry| entry.into()).collect()
+                }
                 _ => Vec::new(),
             }
         } else {
