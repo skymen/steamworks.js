@@ -6,9 +6,8 @@ pub mod leaderboards {
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
     use steamworks::{
-        Leaderboard, LeaderboardDisplayType,
-        LeaderboardEntry as SteamLeaderboardEntry, LeaderboardSortMethod,
-        UploadScoreMethod as SteamUploadScoreMethod,
+        Leaderboard, LeaderboardDisplayType, LeaderboardEntry as SteamLeaderboardEntry,
+        LeaderboardSortMethod, UploadScoreMethod as SteamUploadScoreMethod,
     };
     use tokio::sync::oneshot;
 
@@ -215,7 +214,9 @@ pub mod leaderboards {
             // Convert DataRequest to LeaderboardDataRequest
             let steam_data_request = match data_request {
                 DataRequest::Global => steamworks::LeaderboardDataRequest::Global,
-                DataRequest::GlobalAroundUser => steamworks::LeaderboardDataRequest::GlobalAroundUser,
+                DataRequest::GlobalAroundUser => {
+                    steamworks::LeaderboardDataRequest::GlobalAroundUser
+                }
                 DataRequest::Friends => steamworks::LeaderboardDataRequest::Friends,
             };
 
@@ -249,11 +250,9 @@ pub mod leaderboards {
         let client = crate::client::get_client();
         let handles = (*LEADERBOARD_HANDLES).lock().unwrap();
 
-        if let Some(leaderboard) = handles.get(&leaderboard_name) {
-            Some(client.user_stats().get_leaderboard_name(leaderboard))
-        } else {
-            None
-        }
+        handles
+            .get(&leaderboard_name)
+            .map(|leaderboard| client.user_stats().get_leaderboard_name(leaderboard))
     }
 
     #[napi]
@@ -261,11 +260,9 @@ pub mod leaderboards {
         let client = crate::client::get_client();
         let handles = (*LEADERBOARD_HANDLES).lock().unwrap();
 
-        if let Some(leaderboard) = handles.get(&leaderboard_name) {
-            Some(client.user_stats().get_leaderboard_entry_count(leaderboard))
-        } else {
-            None
-        }
+        handles
+            .get(&leaderboard_name)
+            .map(|leaderboard| client.user_stats().get_leaderboard_entry_count(leaderboard))
     }
 
     #[napi]
