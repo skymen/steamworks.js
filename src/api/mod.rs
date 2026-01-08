@@ -11,6 +11,7 @@ pub mod matchmaking;
 pub mod networking;
 pub mod networking_messages;
 pub mod overlay;
+pub mod screenshots;
 pub mod stats;
 pub mod utils;
 pub mod workshop;
