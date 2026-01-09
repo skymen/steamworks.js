@@ -260,6 +260,12 @@ export declare namespace overlay {
   export function activateToWebPage(url: string): void
   export function activateToStore(appId: number, flag: StoreFlag): void
 }
+export declare namespace screenshots {
+  /**
+   * Triggers the Steam overlay to take a screenshot.
+   */
+  export function triggerScreenshot(): void
+}
 export declare namespace stats {
   export function getInt(name: string): number | null
   export function setInt(name: string, value: number): boolean
