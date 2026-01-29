@@ -44,5 +44,4 @@ pub mod screenshots {
             Err(e) => Err(Error::from_reason(e.to_string())),
         }
     }
-
 }
